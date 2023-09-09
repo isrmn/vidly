@@ -18,10 +18,14 @@ app.get('/api/courses', (req, res) => {
     res.send(courses);
 });
 
+function findCourse(req) {
+    return courses.find(c => c.id === parseInt(req.params.id));
+}
+
 app.get('/api/courses/:id', (req, res) => {
-    const course = courses.find(c => c.id === parseInt(req.params.id));
+    const course = findCourse(req);
     if (!course) {
-        return res.status(404).send(`Course ${req.params.id} not found`);
+        return res.status(404).send(error404(req.params.id));
     }
     res.send(course);
 });
@@ -42,9 +46,9 @@ app.post('/api/courses', (req, res) => {
 });
 
 app.put('/api/courses/:id', (req, res) => {
-    let course = courses.find(c => c.id === parseInt(req.params.id));
+    let course = findCourse(req);
     if (!course) {
-        return res.status(404).send(`Course ${req.params.id} not found`);
+        return res.status(404).send(error404(req.params.id));
     }
 
     const {error} = validateCourse(req.body);
@@ -58,9 +62,9 @@ app.put('/api/courses/:id', (req, res) => {
 });
 
 app.delete('/api/courses/:id', (req, res) => {
-    let course = courses.find(c => c.id === parseInt(req.params.id));
+    const course = findCourse(req);
     if (!course) {
-        return res.status(404).send(`Course ${req.params.id} not found`);
+        return res.status(404).send(error404(req.params.id));
     }
 
     const index = courses.indexOf(course);
@@ -73,8 +77,12 @@ function validateCourse(course) {
     const schema = Joi.object({
         name: Joi.string().min(3).required()
     });
-    const { error, value } = schema.validate(course);
-    return { error, value };
+    const { error} = schema.validate(course);
+    return { error };
+}
+
+function error404(id) {
+    return `Course ${id} not found`;
 }
 
 const port = process.env.PORT || 3000;
