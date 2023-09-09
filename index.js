@@ -28,12 +28,7 @@ app.get('/api/courses/:id', (req, res) => {
 });
 
 app.post('/api/courses', (req, res) => {
-    const schema = Joi.object({
-        name: Joi.string().min(3).required()
-    });
-
-    const { error, value } = schema.validate(req.body);
-
+    const {error} = validateCourse(req.body);
     if (error)  {
         const concatenatedMessages = error.details.map(item => item.message).join(' ');
         res.status(400).send(concatenatedMessages);
