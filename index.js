@@ -22,10 +22,14 @@ function findCourse(req) {
     return courses.find(c => c.id === parseInt(req.params.id));
 }
 
+function getCourseId(req) {
+    return parseInt(req.params.id);
+}
+
 app.get('/api/courses/:id', (req, res) => {
     const course = findCourse(req);
     if (!course) {
-        return res.status(404).send(error404(req.params.id));
+        return res.status(404).send(error404(getCourseId(req)));
     }
     res.send(course);
 });
@@ -48,7 +52,7 @@ app.post('/api/courses', (req, res) => {
 app.put('/api/courses/:id', (req, res) => {
     let course = findCourse(req);
     if (!course) {
-        return res.status(404).send(error404(req.params.id));
+        return res.status(404).send(error404(getCourseId(req)));
     }
 
     const {error} = validateCourse(req.body);
@@ -64,7 +68,7 @@ app.put('/api/courses/:id', (req, res) => {
 app.delete('/api/courses/:id', (req, res) => {
     const course = findCourse(req);
     if (!course) {
-        return res.status(404).send(error404(req.params.id));
+        return res.status(404).send(error404(getCourseId(req)));
     }
 
     const index = courses.indexOf(course);
