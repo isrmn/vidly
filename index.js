@@ -26,6 +26,15 @@ function getCourseId(req) {
     return parseInt(req.params.id);
 }
 
+function validateInput(req, res, next) {
+    const { error } = validateCourse(req.body);
+    if (error) {
+        const concatenatedMessages = error.details.map(item => item.message).join(' ');
+        return res.status(400).send(concatenatedMessages);
+    }
+    next();
+}
+
 app.get('/api/courses/:id', (req, res) => {
     const course = findCourse(req);
     if (!course) {
@@ -34,13 +43,7 @@ app.get('/api/courses/:id', (req, res) => {
     res.send(course);
 });
 
-app.post('/api/courses', (req, res) => {
-    const {error} = validateCourse(req.body);
-    if (error)  {
-        const concatenatedMessages = error.details.map(item => item.message).join(' ');
-        return res.status(400).send(concatenatedMessages);
-    }
-
+app.post('/api/courses', validateInput, (req, res) => {
     const course = {
         id: courses.length + 1,
         name: req.body.name
@@ -49,16 +52,10 @@ app.post('/api/courses', (req, res) => {
     res.send(course);
 });
 
-app.put('/api/courses/:id', (req, res) => {
+app.put('/api/courses/:id', validateInput, (req, res) => {
     let course = findCourse(req);
     if (!course) {
         return res.status(404).send(error404(getCourseId(req)));
-    }
-
-    const {error} = validateCourse(req.body);
-    if (error)  {
-        const concatenatedMessages = error.details.map(item => item.message).join(' ');
-        return res.status(400).send(concatenatedMessages);
     }
 
     course.name = req.body.name;
